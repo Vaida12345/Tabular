@@ -5,20 +5,19 @@ import PackageDescription
 
 let package = Package(
     name: "Tabular",
-    products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "Tabular",
-            targets: ["Tabular"]),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "Tabular"),
-        .testTarget(
-            name: "TabularTests",
-            dependencies: ["Tabular"]
-        ),
+    platforms: [
+        .macOS(.v13),
+        .iOS(.v16),
+        .watchOS(.v9),
+        .tvOS(.v16),
+        .visionOS(.v1),
+        .macCatalyst(.v13)
+    ], products: [
+        .library(name: "Tabular", targets: ["Tabular"]),
+    ], dependencies: [
+        .package(url: "https://www.github.com/Vaida12345/FinderItem", from: "1.0.11")
+    ], targets: [
+        .target(name: "Tabular", dependencies: ["FinderItem"]),
+        .testTarget(name: "TabularTests", dependencies: ["Tabular", "FinderItem"], path: "Tests"),
     ]
 )
