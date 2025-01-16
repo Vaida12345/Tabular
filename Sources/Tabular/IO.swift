@@ -40,6 +40,8 @@ extension Tabular {
     }
     
     /// Reads a table at `source`.
+    ///
+    /// - Bug: embedded line breaks not supported.
     public init(at source: FinderItem) async throws {
         var lines = await source.load(.lines).makeAsyncIterator()
         guard let titlesText = try await lines.next() else {
@@ -100,7 +102,9 @@ extension Tabular {
                         increment()
                     } else {
                         openQuote = false
-                        finalize()
+                        guard next.isNil(or: { $0 == "," }) else {
+                            throw ValidationError.misplacementOfQuotes
+                        }
                     }
                 } else {
                     guard currentGroup.isEmpty else {
@@ -143,7 +147,7 @@ extension Tabular {
             case .emptyFile:
                 "The file is empty."
             case .validationError(let error):
-                "CSV Formatting Error: \(error.message)."
+                "CSV Formatting Error: \(error.message)"
             case .titlesMismatch(let missing, let extra):
                 "Titles mismatch: In the declared titles, in comparison to the titles in the file, \(missing.joined(separator: ", ")) are missing, and \(extra.joined(separator: ", ")) are extra."
             case .titlesOrderMismatch:

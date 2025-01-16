@@ -9,7 +9,7 @@
 extension Tabular {
     
     /// A row to a ``Tabular``.
-    public struct Row {
+    public struct Row: Equatable {
         
         private var dictionary: [String : String]
         
@@ -35,6 +35,12 @@ extension Tabular {
         public subscript(_ index: String) -> String? {
             guard let index = Key(rawValue: index) else { return nil }
             return dictionary[index.rawValue, default: ""]
+        }
+        
+        public static func == (lhs: Row, rhs: Row) -> Bool {
+            Key.allCases.allSatisfy { key in
+                lhs[key] == rhs[key]
+            }
         }
         
     }

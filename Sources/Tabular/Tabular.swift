@@ -7,7 +7,7 @@
 
 
 /// A table.
-public struct Tabular<Key: TabularKey> {
+public struct Tabular<Key: TabularKey>: Equatable {
     
     /// The rows in this table.
     public var rows: [Row]
