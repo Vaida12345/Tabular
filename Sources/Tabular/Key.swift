@@ -6,9 +6,9 @@
 //
 
 
-/// The protocol that the ``Tabular/Key`` conforms.
+/// The protocol that the `Key`s of ``Tabular`` conforms.
 ///
 /// Use this protocol to declare the titles to a tabular, where the `rawValue`s will be used as titles.
-public protocol TabularKey: RawRepresentable, CaseIterable, Equatable, Sendable where Self.RawValue == String {
+public protocol TabularKey: RawRepresentable, CaseIterable, Equatable, Hashable, Sendable where Self.RawValue == String {
     
 }

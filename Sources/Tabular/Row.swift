@@ -5,13 +5,15 @@
 //  Created by Vaida on 1/16/25.
 //
 
+import Essentials
+
 
 extension Tabular {
     
     /// A row to a ``Tabular``.
     public struct Row: Equatable {
         
-        private var dictionary: [String : String]
+        private var dictionary: [Key : String]
         
         
         /// Creates a row.
@@ -24,17 +26,17 @@ extension Tabular {
         /// Access the value associated with the given `index`.
         public subscript(_ index: Key) -> String {
             get {
-                dictionary[index.rawValue, default: ""]
+                dictionary[index, default: ""]
             }
             set {
-                dictionary[index.rawValue] = newValue
+                dictionary[index] = newValue
             }
         }
         
         /// Access the value associated with the given `index`, or `nil` if the `index` is not valid.
         public subscript(_ index: String) -> String? {
             guard let index = Key(rawValue: index) else { return nil }
-            return dictionary[index.rawValue, default: ""]
+            return self[index]
         }
         
         public static func == (lhs: Row, rhs: Row) -> Bool {
@@ -43,6 +45,28 @@ extension Tabular {
             }
         }
         
+    }
+    
+}
+
+
+extension Tabular.Row {
+    
+    /// Validates and ensures all keys have been assigned.
+    public func validate() throws {
+        let missingKeys = Set(Key.allCases).subtracting(self.dictionary.keys)
+        guard missingKeys.isEmpty else { throw ValidationError.missingKeys(missingKeys) }
+    }
+    
+    
+    public enum ValidationError: GenericError {
+        case missingKeys(Set<Key>)
+        
+        public var message: String {
+            switch self {
+            case .missingKeys(let keys): "Missing keys: \(keys)"
+            }
+        }
     }
     
 }
