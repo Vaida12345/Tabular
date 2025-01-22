@@ -14,7 +14,7 @@ extension Tabular {
     
     /// Writes the table as `csv` to `destination`.
     @inlinable
-    public func write(to target: inout some TextOutputStream) async {
+    public func write(to target: inout some TextOutputStream) {
         let cases = Key.allCases
         let titles = cases.map({ text(for: $0.rawValue) }).joined(separator: ",") + "\n"
         target.write(titles)
@@ -33,9 +33,9 @@ extension Tabular {
     
     /// Writes the table as `csv` to `destination`.
     @inlinable
-    public func write(to destination: FinderItem) async throws {
+    public func write(to destination: FinderItem) throws {
         var text = ""
-        await self.write(to: &text)
+        self.write(to: &text)
         try text.write(to: destination)
     }
     

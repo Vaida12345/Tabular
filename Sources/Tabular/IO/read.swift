@@ -13,16 +13,21 @@ import FinderItem
 extension Tabular {
     
     /// Reads a table at `source`.
-    public init(at source: FinderItem) async throws {
-        let lines = try source.load(.string())
+    public init(at source: FinderItem) throws {
+        try self.init(string: source.load(.string()))
+    }
+    
+    /// Reads a table at `source`.
+    public init(string: String) throws {
+        guard !string.isEmpty else { throw DecodeError.emptyFile }
+        
+        let lines = string
         let matrix = try Tabular.parse(lines: lines)
         
         let cases = Key.allCases
-        guard let titles = matrix.first else {
-            throw DecodeError.emptyFile
-        }
-        let missing = Set(titles).subtracting(cases.map(\.rawValue))
-        let extra = Set(cases.map(\.rawValue)).subtracting(titles)
+        let titles = matrix.first!
+        let extra = Set(titles).subtracting(cases.map(\.rawValue))
+        let missing = Set(cases.map(\.rawValue)).subtracting(titles)
         guard missing.isEmpty && extra.isEmpty else {
             throw DecodeError.titlesMismatch(missing: missing, extra: extra)
         }
@@ -133,7 +138,7 @@ extension Tabular {
             case .validationError(let error):
                 "CSV Formatting Error: \(error.message)"
             case .titlesMismatch(let missing, let extra):
-                "Titles mismatch: In the declared titles, in comparison to the titles in the file, \(missing.joined(separator: ", ")) are missing, and \(extra.joined(separator: ", ")) are extra."
+                "Titles mismatch: In the declared titles, in comparison to the titles in the file, \(missing) are missing, and \(extra) are extra."
             case .titlesOrderMismatch:
                 "The order in which titles are declared does not match the order in which they appear in the file."
             }

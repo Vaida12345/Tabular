@@ -19,7 +19,7 @@ struct IOTests {
         let table = referenceTable()
         
         var result = ""
-        await table.write(to: &result)
+        table.write(to: &result)
         #expect(result == reference)
     }
     
@@ -31,9 +31,23 @@ struct IOTests {
             try? file.remove()
         }
         
-        let table = try await Tabular<Keys>(at: file)
+        let table = try Tabular<Keys>(at: file)
         for (lhs, rhs) in zip(table.rows, referenceTable().rows) {
             #expect(lhs == rhs)
+        }
+    }
+    
+    @Test
+    func readEmpty() async throws {
+        #expect(throws: Tabular<Keys>.DecodeError.emptyFile) {
+            let _ = try Tabular<Keys>(string: "")
+        }
+    }
+    
+    @Test
+    func readTitlesMismatch() {
+        #expect(throws: Tabular<Keys>.DecodeError.titlesMismatch(missing: ["Model", "Price", "Description"], extra: ["Car"])) {
+            let _ = try Tabular<Keys>(string: "Year,Make,Car")
         }
     }
     
