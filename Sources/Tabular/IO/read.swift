@@ -1,5 +1,5 @@
 //
-//  IO.swift
+//  read.swift
 //  Tabular
 //
 //  Created by Vaida on 1/16/25.
@@ -12,43 +12,15 @@ import FinderItem
 
 extension Tabular {
     
-    /// Writes the table as `csv` to `destination`.
-    @inlinable
-    public func write(to target: inout some TextOutputStream) async {
-        let cases = Key.allCases
-        let titles = cases.map({ text(for: $0.rawValue) }).joined(separator: ",") + "\n"
-        target.write(titles)
-        
-        func text(for cell: String) -> String {
-            let shouldQuote = cell.contains(",") || cell.contains("\n") || cell.contains("\"") || cell.hasPrefix(" ") || cell.hasSuffix(" ")
-            let transformed = cell.replacingOccurrences(of: "\"", with: "\"\"")
-            return shouldQuote ? "\"\(transformed)\"" : transformed
-        }
-        
-        for (offset, row) in rows.enumerated() {
-            target.write(cases.map { text(for: row[$0]) }.joined(separator: ","))
-            if offset != rows.count - 1 { target.write("\n") }
-        }
-    }
-    
-    /// Writes the table as `csv` to `destination`.
-    @inlinable
-    public func write(to destination: FinderItem) async throws {
-        var text = ""
-        await self.write(to: &text)
-        try text.write(to: destination)
-    }
-    
     /// Reads a table at `source`.
-    ///
-    /// - Bug: embedded line breaks not supported.
     public init(at source: FinderItem) async throws {
-        var lines = await source.load(.lines).makeAsyncIterator()
-        guard let titlesText = try await lines.next() else {
+        let lines = try source.load(.string())
+        let matrix = try Tabular.parse(lines: lines)
+        
+        let cases = Key.allCases
+        guard let titles = matrix.first else {
             throw DecodeError.emptyFile
         }
-        let cases = Key.allCases
-        let titles = try Tabular.parse(line: titlesText)
         let missing = Set(titles).subtracting(cases.map(\.rawValue))
         let extra = Set(cases.map(\.rawValue)).subtracting(titles)
         guard missing.isEmpty && extra.isEmpty else {
@@ -59,9 +31,8 @@ extension Tabular {
         }
         var rows: [Row] = []
         
-        while let line = try await lines.next() {
-            guard !line.isEmpty else { continue }
-            let cells = try Tabular.parse(line: line)
+        for cells in matrix.dropFirst() {
+            guard !cells.isEmpty else { continue }
             guard cells.count == titles.count else {
                 throw DecodeError.validationError(.cellCountMismatch)
             }
@@ -74,14 +45,15 @@ extension Tabular {
         self.rows = rows
     }
     
-    private static func parse(line: String) throws -> [String] {
-        var iterator = line.makeIterator()
+    private static func parse(lines: String) throws -> [[String]] {
+        var iterator = lines.makeIterator()
         var curr = iterator.next()
         var next = iterator.next()
         var openQuote: Bool = false
         
         var currentGroup: String = ""
         var groups: [String] = []
+        var metaGroups: [[String]] = []
         
         func increment() {
             curr = next
@@ -91,6 +63,12 @@ extension Tabular {
         func finalize() {
             groups.append(currentGroup)
             currentGroup = ""
+        }
+        
+        func finalizeMetaGroup() {
+            finalize()
+            metaGroups.append(groups)
+            groups = []
         }
         
         while let curr {
@@ -118,6 +96,12 @@ extension Tabular {
                 } else {
                     finalize()
                 }
+            case "\n":
+                if openQuote {
+                    fallthrough
+                } else {
+                    finalizeMetaGroup()
+                }
             default:
                 currentGroup.append(curr)
             }
@@ -125,12 +109,12 @@ extension Tabular {
             increment()
         }
         
-        finalize()
+        finalizeMetaGroup()
         guard !openQuote else {
             throw ValidationError.unterminatedQuote
         }
         
-        return groups
+        return metaGroups
     }
     
     
@@ -173,5 +157,4 @@ extension Tabular {
             }
         }
     }
-    
 }

@@ -45,7 +45,8 @@ let reference = #"""
         1997,Ford,E350,"ac, abs, moon",3000.00
         1999,Chevy,"Venture ""Extended Edition""",,4900.00
         1999,Chevy,"Venture ""Extended Edition, Very Large""",,5000.00
-        1996,Jeep,Grand Cherokee,"MUST SELL! air, moon roof, loaded",4799.00
+        1996,Jeep,Grand Cherokee,"MUST SELL!
+        air, moon roof, loaded",4799.00
         """#
 
 func referenceTable() -> Tabular<Keys> {
@@ -77,7 +78,7 @@ func referenceTable() -> Tabular<Keys> {
         row[.year] = "1996"
         row[.make] = "Jeep"
         row[.model] = "Grand Cherokee"
-        row[.description] = "MUST SELL! air, moon roof, loaded"
+        row[.description] = "MUST SELL!\nair, moon roof, loaded"
         row[.price] = "4799.00"
     }
     

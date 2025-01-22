@@ -31,18 +31,37 @@ struct DescriptionTests {
     }
     
     @Test
+    func rowWithNewLine() {
+        var row = Tabular<Keys>.Row()
+        row[.a] = "a"
+        row[.b] = "123\n456"
+        
+        let reference = """
+        ┏━━━┳━━━━━┳━━━┓
+        ┃ a ┃  b  ┃ c ┃
+        ┡━━━╇━━━━━╇━━━┩
+        │ a │ 123 │   │
+        │   │ 456 │   │
+        └───┴─────┴───┘
+        """
+        
+        #expect(row.description == reference)
+    }
+    
+    @Test
     func table() {
         let table = referenceTable()
         
         let reference = """
-        ┏━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
-        ┃ Year ┃ Make  ┃                 Model                  ┃            Description            ┃  Price  ┃
-        ┡━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
-        │ 1997 │ Ford  │ E350                                   │ ac, abs, moon                     │ 3000.00 │
-        │ 1999 │ Chevy │ Venture "Extended Edition"             │                                   │ 4900.00 │
-        │ 1999 │ Chevy │ Venture "Extended Edition, Very Large" │                                   │ 5000.00 │
-        │ 1996 │ Jeep  │ Grand Cherokee                         │ MUST SELL! air, moon roof, loaded │ 4799.00 │
-        └──────┴───────┴────────────────────────────────────────┴───────────────────────────────────┴─────────┘
+        ┏━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
+        ┃ Year ┃ Make  ┃                 Model                  ┃      Description       ┃  Price  ┃
+        ┡━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
+        │ 1997 │ Ford  │ E350                                   │ ac, abs, moon          │ 3000.00 │
+        │ 1999 │ Chevy │ Venture "Extended Edition"             │                        │ 4900.00 │
+        │ 1999 │ Chevy │ Venture "Extended Edition, Very Large" │                        │ 5000.00 │
+        │ 1996 │ Jeep  │ Grand Cherokee                         │ MUST SELL!             │ 4799.00 │
+        │      │       │                                        │ air, moon roof, loaded │         │
+        └──────┴───────┴────────────────────────────────────────┴────────────────────────┴─────────┘
         """
         #expect(table.description == reference)
     }
