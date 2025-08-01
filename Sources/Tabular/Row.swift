@@ -29,6 +29,8 @@ extension Tabular {
         
         
         /// Access the value associated with the given `index`.
+        ///
+        /// If an associated value is not found, the default value `""` will be used instead.
         public subscript(_ index: Key) -> String {
             get {
                 dictionary[index, default: ""]
@@ -40,7 +42,7 @@ extension Tabular {
         
         /// Creates the sequence with the values stored.
         ///
-        /// - throws: ``ValidationError/invalid(expected:got:)``.
+        /// - throws: ``ValidationError/incorrectCount(expected:got:)``.
         public init(_ sequence: some Sequence<String>) throws {
             self.dictionary = [:]
             let allKeys = Key.allCases
