@@ -15,7 +15,7 @@ let package = Package(
     ], products: [
         .library(name: "Tabular", targets: ["Tabular"]),
     ], dependencies: [
-        .package(url: "https://www.github.com/Vaida12345/FinderItem", from: "1.0.11")
+        .package(url: "https://github.com/Vaida12345/FinderItem.git", from: "1.0.11")
     ], targets: [
         .target(name: "Tabular", dependencies: ["FinderItem"]),
         .testTarget(name: "TabularTests", dependencies: ["Tabular", "FinderItem"], path: "Tests"),
