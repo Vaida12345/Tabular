@@ -39,7 +39,7 @@ extension Tabular {
         for (line, cells) in matrix.dropFirst().enumerated() {
             guard !cells.isEmpty else { continue }
             guard cells.count == titles.count else {
-                throw DecodeError.validationError(.cellCountMismatch(line: line + 1))
+                throw DecodeError.validationError(.cellCountMismatch(line: line + 1, expected: titles.count, actual: cells.count))
             }
             
             var row = Row()
@@ -51,7 +51,7 @@ extension Tabular {
     }
     
     private static func parse(lines: String) throws -> [[String]] {
-        var iterator = lines.makeIterator()
+        var iterator = lines.trimmingCharacters(in: .newlines).makeIterator()
         var curr = iterator.next()
         var next = iterator.next()
         var openQuote: Bool = false
@@ -153,7 +153,7 @@ extension Tabular {
     public enum ValidationError: GenericError {
         case misplacementOfQuotes(line: Int)
         case unterminatedQuote(line: Int)
-        case cellCountMismatch(line: Int)
+        case cellCountMismatch(line: Int, expected: Int, actual: Int)
         
         public var message: String {
             switch self {
@@ -161,8 +161,8 @@ extension Tabular {
                 "There is a misplaced quote on line \(line)."
             case let .unterminatedQuote(line):
                 "There is an unterminated quote on line \(line)."
-            case let .cellCountMismatch(line):
-                "The number of cells in a row does not match the number of declared titles on line \(line)."
+            case let .cellCountMismatch(line, expected, actual):
+                "The number of cells in a row does not match the number of declared titles on line \(line). (Expected \(expected), but got \(actual))"
             }
         }
     }
