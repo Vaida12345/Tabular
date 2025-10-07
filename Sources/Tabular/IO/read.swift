@@ -64,7 +64,6 @@ extension Tabular {
         func increment() {
             curr = next
             next = iterator.next()
-            lineNumber += 1
         }
         
         func finalize() {
@@ -104,6 +103,7 @@ extension Tabular {
                     finalize()
                 }
             case "\n":
+                lineNumber += 1
                 if openQuote {
                     fallthrough
                 } else {
@@ -148,6 +148,8 @@ extension Tabular {
     }
     
     /// CSV formatting error.
+    ///
+    /// The `line` number refers to the line in raw form, for example, when you open the csv as a txt.
     public enum ValidationError: GenericError {
         case misplacementOfQuotes(line: Int)
         case unterminatedQuote(line: Int)
