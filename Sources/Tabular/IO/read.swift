@@ -55,7 +55,7 @@ extension Tabular {
         var curr = iterator.next()
         var next = iterator.next()
         var openQuote: Bool = false
-        var lineNumber = 0
+        var lineNumber = 1
         
         var currentGroup: String = ""
         var groups: [String] = []
@@ -86,7 +86,7 @@ extension Tabular {
                         increment()
                     } else {
                         openQuote = false
-                        guard next.isNil(or: { $0 == "," }) else {
+                        guard next.isNil(or: { [",", "\n"].contains($0) }) else {
                             throw ValidationError.misplacementOfQuotes(line: lineNumber)
                         }
                     }

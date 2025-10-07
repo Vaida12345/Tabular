@@ -50,7 +50,7 @@ struct DescriptionTests {
     
     @Test
     func table() {
-        let table = referenceTable()
+        let table = IOTests.WikiSuite.referenceTable()
         
         let reference = """
         ┏━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
