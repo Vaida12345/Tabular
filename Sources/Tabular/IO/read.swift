@@ -36,10 +36,10 @@ extension Tabular {
         }
         var rows: [Row] = []
         
-        for cells in matrix.dropFirst() {
+        for (line, cells) in matrix.dropFirst().enumerated() {
             guard !cells.isEmpty else { continue }
             guard cells.count == titles.count else {
-                throw DecodeError.validationError(.cellCountMismatch)
+                throw DecodeError.validationError(.cellCountMismatch(line: line + 1))
             }
             
             var row = Row()
@@ -55,6 +55,7 @@ extension Tabular {
         var curr = iterator.next()
         var next = iterator.next()
         var openQuote: Bool = false
+        var lineNumber = 0
         
         var currentGroup: String = ""
         var groups: [String] = []
@@ -63,6 +64,7 @@ extension Tabular {
         func increment() {
             curr = next
             next = iterator.next()
+            lineNumber += 1
         }
         
         func finalize() {
@@ -86,12 +88,12 @@ extension Tabular {
                     } else {
                         openQuote = false
                         guard next.isNil(or: { $0 == "," }) else {
-                            throw ValidationError.misplacementOfQuotes
+                            throw ValidationError.misplacementOfQuotes(line: lineNumber)
                         }
                     }
                 } else {
                     guard currentGroup.isEmpty else {
-                        throw ValidationError.misplacementOfQuotes
+                        throw ValidationError.misplacementOfQuotes(line: lineNumber)
                     }
                     openQuote = true
                 }
@@ -116,7 +118,7 @@ extension Tabular {
         
         finalizeMetaGroup()
         guard !openQuote else {
-            throw ValidationError.unterminatedQuote
+            throw ValidationError.unterminatedQuote(line: lineNumber)
         }
         
         return metaGroups
@@ -147,18 +149,18 @@ extension Tabular {
     
     /// CSV formatting error.
     public enum ValidationError: GenericError {
-        case misplacementOfQuotes
-        case unterminatedQuote
-        case cellCountMismatch
+        case misplacementOfQuotes(line: Int)
+        case unterminatedQuote(line: Int)
+        case cellCountMismatch(line: Int)
         
         public var message: String {
             switch self {
-            case .misplacementOfQuotes:
-                "There is a misplaced quote."
-            case .unterminatedQuote:
-                "There is an unterminated quote."
-            case .cellCountMismatch:
-                "The number of cells in a row does not match the number of declared titles."
+            case let .misplacementOfQuotes(line):
+                "There is a misplaced quote on line \(line)."
+            case let .unterminatedQuote(line):
+                "There is an unterminated quote on line \(line)."
+            case let .cellCountMismatch(line):
+                "The number of cells in a row does not match the number of declared titles on line \(line)."
             }
         }
     }
